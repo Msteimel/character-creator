@@ -1,0 +1,13 @@
+.text-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.text-field__label {
+  /* padding-left: var(--space-xs); */
+}
+
+.text-field__display-label {
+  /* padding-left: var(--space-xs); */
+}

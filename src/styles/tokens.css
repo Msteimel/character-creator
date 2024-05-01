@@ -1,0 +1,79 @@
+:root {
+  /* tier 0 - baseline */
+  font-size: 16px;
+  --base: 1rem;
+
+  /* tier 1 - definifions */
+  --2xs: calc(var(--base) / 4);
+  --xs: calc(var(--base) / 2);
+  --sm: calc(var(--base) * 0.75);
+  --md: var(--base);
+  --lg: calc(var(--base) * 1.25);
+  --xl: calc(var(--base) * 1.5);
+  --2xl: calc(var(--base) * 2);
+  --3xl: calc(var(--base) * 3);
+  --4xl: calc(var(--base) * 4);
+  --5xl: calc(var(--base) * 5);
+
+  --color-white: #fff;
+  --color-black: #222;
+  --color-gray-100: #f7fafc;
+  --color-gray-200: #edf2f7;
+  --color-gray-300: #e2e8f0;
+  --color-gray-400: #cbd5e0;
+  --color-gray-500: #a0aec0;
+  --color-gray-600: #718096;
+  --color-gray-700: #4a5568;
+  --color-gray-800: #2d3748;
+  --color-gray-900: #1a202c;
+  --color-red-100: #fff5f5;
+  --color-red-200: #fed7d7;
+  --color-red-300: #feb2b2;
+  --color-red-400: #fc8181;
+  --color-red-500: #f56565;
+  --color-red-600: #e53e3e;
+  --color-red-700: #c53030;
+  --color-red-800: #9b2c2c;
+  --color-red-900: #742a2a;
+  --color-green-100: #f0fff4;
+  --color-green-200: #c6f6d5;
+  --color-green-300: #9ae6b4;
+  --color-green-400: #68d391;
+  --color-green-500: #48bb78;
+  --color-green-600: #38a169;
+  --color-green-700: #2f855a;
+  --color-green-800: #276749;
+  --color-green-900: #22543d;
+
+  /* tier 2 - usage */
+  /* space */
+  --space-2xs: var(--2xs);
+  --space-xs: var(--xs);
+  --space-sm: var(--sm);
+  --space-md: var(--md);
+  --space-lg: var(--lg);
+  --space-xl: var(--xl);
+  --space-2xl: var(--2xl);
+  --space-3xl: var(--3xl);
+  --space-4xl: var(--4xl);
+  --space-5xl: var(--5xl);
+
+  /* font size */
+  --font-size-2xs: var(--2xs);
+  --font-size-xs: var(--xs);
+  --font-size-sm: var(--sm);
+  --font-size-md: var(--md);
+  --font-size-lg: var(--lg);
+  --font-size-xl: var(--xl);
+  --font-size-2xl: var(--2xl);
+  --font-size-3xl: var(--3xl);
+  --font-size-4xl: var(--4xl);
+  --font-size-5xl: var(--5xl);
+
+  /* colors */
+  --color-text-primary: var(--color-gray-900);
+  --color-text-secondary: var(--color-gray-700);
+  --color-text-error: var(--color-red-700);
+  --color-text-success: var(--color-green-700);
+  --color-text-disabled: var(--color-gray-500);
+}
