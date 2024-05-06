@@ -25,6 +25,18 @@ export interface TextInputProps
    */
   placeholder?: string;
   /**
+   * The text input's input mode.
+   */
+  inputMode?:
+    | "text"
+    | "none"
+    | "tel"
+    | "url"
+    | "email"
+    | "numeric"
+    | "decimal"
+    | "search";
+  /**
    * The text input's value.
    */
   value?: string | number;
@@ -33,6 +45,10 @@ export interface TextInputProps
    */
   defaultValue?: string | number;
   /**
+   * Whether the text input is required.
+   */
+  required?: boolean;
+  /**
    * Callback function to handle changes to the text input.
    */
   onChange?: (event: ChangeEvent<HTMLInputElement>) => void;
@@ -40,12 +56,14 @@ export interface TextInputProps
 
 export const TextInput = ({
   className,
-  disabled,
+  disabled = false,
   id,
   name,
   placeholder,
+  inputMode,
   value,
   defaultValue,
+  required = false,
   onChange,
   ...props
 }: TextInputProps) => {
@@ -60,9 +78,11 @@ export const TextInput = ({
       id={id}
       name={name}
       placeholder={placeholder}
+      inputMode={inputMode}
       value={value}
       defaultValue={defaultValue}
       onChange={onChange}
+      required={required}
       {...props}
     />
   );

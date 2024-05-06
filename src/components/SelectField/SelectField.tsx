@@ -1,10 +1,10 @@
-import React, { ChangeEvent, useState } from "react";
+import React, { useState, ChangeEvent } from "react";
 import cx from "classnames";
-import "./textField.css";
+import "./selectField.css";
 import { Label, LabelProps } from "components/Label/Label";
-import { TextInput, TextInputProps } from "components/TextInput/TextInput";
+import { Select, SelectProps } from "components/Select/Select";
 
-export interface TextFieldProps extends TextInputProps, LabelProps {
+export interface SelectFieldProps extends SelectProps, LabelProps {
   /**
    * Label for input
    */
@@ -15,23 +15,22 @@ export interface TextFieldProps extends TextInputProps, LabelProps {
   displayValueLabel?: string;
 }
 
-export const TextField = ({
+export const SelectField = ({
   className,
   label,
   id,
   disabled = false,
   required = false,
   error = false,
-  placeholder,
-  defaultValue,
+  options,
+  value,
   displayValueLabel,
   onChange,
-}: TextFieldProps) => {
-  // Initialize state for the input value
-  const [inputValue, setInputValue] = useState(defaultValue || "");
+}: SelectFieldProps) => {
+  const [inputValue, setInputValue] = useState(options[0].label || "");
 
   // Custom onChange handler to update state
-  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
     setInputValue(event.target.value); // Update the state with new input value
 
     if (onChange) {
@@ -39,26 +38,27 @@ export const TextField = ({
     }
   };
 
-  const componentClassName = cx("text-field", className, {
-    "text-field--error": error,
+  const componentClassName = cx("select-field", className, {
+    "select-field--error": error,
   });
 
   return (
     <div className={componentClassName}>
       <Label
-        className="text-field__label"
+        className="select-field__label"
         htmlFor={id}
         text={label}
         required={required}
       />
-      <TextInput
+      <Select
         id={id}
         name={id}
-        placeholder={placeholder}
-        value={inputValue} // Controlled component
+        value={inputValue}
+        options={options}
+        disabled={disabled}
+        error={error}
         onChange={handleChange}
       />
-      {/* Display the label and the current input value */}
       {displayValueLabel && (
         <span className="text-field__display-label">{`${displayValueLabel} ${inputValue}`}</span>
       )}

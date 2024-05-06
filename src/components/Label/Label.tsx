@@ -33,11 +33,14 @@ export const Label = ({
   id,
   htmlFor,
   text,
-  required,
-  error,
+  required = false,
+  error = false,
   ...other
 }: LabelProps) => {
-  const componentClassName = cx("label", className);
+  const componentClassName = cx("label", className, {
+    "label--required": required,
+    "label--error": error,
+  });
 
   return (
     <label className={componentClassName} id={id} htmlFor={htmlFor} {...other}>
