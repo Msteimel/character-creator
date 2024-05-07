@@ -2,7 +2,8 @@ import React from "react";
 import cx from "classnames";
 import "./select.css";
 
-export interface SelectProps {
+export interface SelectProps
+  extends React.InputHTMLAttributes<HTMLSelectElement> {
   /**
    * Additional class names to apply to the select.
    */

@@ -23,7 +23,6 @@ export const SelectField = ({
   required = false,
   error = false,
   options,
-  value,
   displayValueLabel,
   onChange,
 }: SelectFieldProps) => {
@@ -60,7 +59,9 @@ export const SelectField = ({
         onChange={handleChange}
       />
       {displayValueLabel && (
-        <span className="text-field__display-label">{`${displayValueLabel} ${inputValue}`}</span>
+        <span className="select-field__display-label">
+          {displayValueLabel} {inputValue}
+        </span>
       )}
     </div>
   );
