@@ -15,9 +15,13 @@ export interface LabelProps {
    */
   htmlFor?: string;
   /**
-   * The label text string
+   * The label label string
    */
-  text?: string | boolean;
+  label?: string | boolean;
+  /**
+   * The secondary label string
+   */
+  secondaryLabel?: string;
   /**
    * Whether the label is required.
    */
@@ -32,7 +36,8 @@ export const Label = ({
   className,
   id,
   htmlFor,
-  text,
+  label,
+  secondaryLabel,
   required = false,
   error = false,
   ...other
@@ -44,7 +49,8 @@ export const Label = ({
 
   return (
     <label className={componentClassName} id={id} htmlFor={htmlFor} {...other}>
-      {text}
+      <span>{label}</span> {secondaryLabel && <i>{secondaryLabel}</i>}{" "}
+      {error ? "Error" : ""} {required ? "*" : ""}
     </label>
   );
 };

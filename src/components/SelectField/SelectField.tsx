@@ -5,32 +5,28 @@ import { Label, LabelProps } from "components/Label/Label";
 import { Select, SelectProps } from "components/Select/Select";
 
 export interface SelectFieldProps extends SelectProps, LabelProps {
-  /**
-   * Label for input
-   */
   label?: string;
-  /**
-   * Label of displayed value
-   */
   displayValueLabel?: string;
 }
 
 export const SelectField = ({
   className,
   label,
+  secondaryLabel,
   id,
   disabled = false,
   required = false,
   error = false,
   options,
   displayValueLabel,
+  value, // Ensure this is passed from the parent component
   onChange,
 }: SelectFieldProps) => {
-  const [inputValue, setInputValue] = useState(options[0].label || "");
+  const [inputValue, setInputValue] = useState(value);
 
-  // Custom onChange handler to update state
   const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
-    setInputValue(event.target.value); // Update the state with new input value
+    const newValue = event.target.value;
+    setInputValue(newValue); // Update the internal state
 
     if (onChange) {
       onChange(event); // Call external onChange handler if provided
@@ -46,7 +42,8 @@ export const SelectField = ({
       <Label
         className="select-field__label"
         htmlFor={id}
-        text={label}
+        label={label}
+        secondaryLabel={secondaryLabel}
         required={required}
       />
       <Select
@@ -60,7 +57,7 @@ export const SelectField = ({
       />
       {displayValueLabel && (
         <span className="select-field__display-label">
-          {displayValueLabel} {inputValue}
+          {displayValueLabel}: {inputValue}
         </span>
       )}
     </div>

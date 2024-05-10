@@ -1,4 +1,4 @@
-import React, { ChangeEvent } from "react";
+import React, { ChangeEvent, useState } from "react";
 import cx from "classnames";
 import "./textInput.css";
 
@@ -37,6 +37,10 @@ export interface TextInputProps
     | "decimal"
     | "search";
   /**
+   * The text input's type.
+   */
+  type?: "text" | "number" | "email" | "tel" | "password" | "search" | "url";
+  /**
    * The text input's value.
    */
   value?: string | number;
@@ -44,6 +48,14 @@ export interface TextInputProps
    * The text input's default value.
    */
   defaultValue?: string | number;
+  /*
+   * The minimum number allowed in the input
+   */
+  minNumber?: number;
+  /*
+   * The maximum number allowed in the input
+   */
+  maxNumber?: number;
   /**
    * Whether the text input is required.
    */
@@ -63,13 +75,26 @@ export const TextInput = ({
   inputMode,
   value,
   defaultValue,
+  type = "text",
+  minNumber = 0,
+  maxNumber,
   required = false,
   onChange,
   ...props
 }: TextInputProps) => {
+  // const [inputValue, setInputValue] = useState(defaultValue || "");
+
   const componentClassName = cx("text-input", className, {
     "text-input--disabled": disabled,
   });
+
+  // const handleOnChange = (event: ChangeEvent<HTMLInputElement>) => {
+  //   setInputValue(event.target.value);
+
+  //   if (onChange) {
+  //     onChange(event);
+  //   }
+  // };
 
   return (
     <input
@@ -79,7 +104,10 @@ export const TextInput = ({
       name={name}
       placeholder={placeholder}
       inputMode={inputMode}
+      type={type}
       value={value}
+      min={minNumber}
+      max={maxNumber}
       defaultValue={defaultValue}
       onChange={onChange}
       required={required}

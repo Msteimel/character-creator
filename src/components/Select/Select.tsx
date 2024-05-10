@@ -19,7 +19,7 @@ export interface SelectProps
   /**
    * The select's value.
    */
-  value?: string;
+  value?: string | undefined;
   /**
    * The select's options.
    */

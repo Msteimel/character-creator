@@ -18,6 +18,7 @@ export interface CheckboxFieldItemProps extends LabelProps, CheckboxInputProps {
 export const CheckboxFieldItem = ({
   className,
   label,
+  secondaryLabel,
   id,
   checked = false,
   disabled = false,
@@ -58,7 +59,8 @@ export const CheckboxFieldItem = ({
       <Label
         className="checkbox-field-item__label"
         htmlFor={id}
-        text={label}
+        label={label}
+        secondaryLabel={secondaryLabel}
         required={required}
         error={error}
       />

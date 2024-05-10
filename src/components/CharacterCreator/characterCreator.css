@@ -1,3 +1,9 @@
 .character-creator {
   margin: var(--space-5xl);
 }
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: var(--space-2xl);
+}
