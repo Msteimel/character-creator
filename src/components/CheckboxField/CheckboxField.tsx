@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import cx from "classnames";
 import {
   CheckboxFieldItem,
@@ -10,28 +10,13 @@ import "./checkboxField.css";
 interface checkboxItem extends CheckboxFieldItemProps {}
 
 export interface CheckboxFieldProps {
-  /**
-   * Additional class names to apply to the checkbox field item.
-   */
   className?: string;
-  /**
-   * The checkbox's legend.
-   */
   legend?: string;
-  /**
-   * The checkbox's id.
-   */
   id?: string;
-  /**
-   * The checkbox item elements.
-   */
   checkboxItems: checkboxItem | checkboxItem[];
   error?: boolean;
   maxChecked?: number;
   required?: boolean;
-  /**
-   * change event handler
-   */
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
@@ -53,31 +38,28 @@ export const CheckboxField = ({
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { id, checked } = event.target;
 
-    setCheckedIds((prev) => {
-      const newCheckedIds = checked
-        ? [...prev, id]
-        : prev.filter((checkboxId) => checkboxId !== id);
+    let updatedCheckedIds = checked
+      ? [...checkedIds, id]
+      : checkedIds.filter((checkboxId) => checkboxId !== id);
 
-      return newCheckedIds;
-    });
-
-    if (onChange) {
-      onChange(event);
-    }
-  };
-
-  useEffect(() => {
-    if (maxChecked && checkedIds.length > maxChecked) {
+    // Validate selections
+    if (maxChecked && updatedCheckedIds.length > maxChecked) {
       setIsError(true);
       setErrorMessages(`You can only select up to ${maxChecked} items`);
-    } else if (required && checkedIds.length === 0) {
+    } else if (required && updatedCheckedIds.length === 0) {
       setIsError(true);
       setErrorMessages("This field is required");
     } else {
       setIsError(false);
       setErrorMessages("");
     }
-  }, [checkedIds, maxChecked, required]);
+
+    setCheckedIds(updatedCheckedIds);
+
+    if (onChange) {
+      onChange(event);
+    }
+  };
 
   const componentClassName = cx("checkbox-input", className);
 

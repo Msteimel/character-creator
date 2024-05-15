@@ -82,19 +82,9 @@ export const TextInput = ({
   onChange,
   ...props
 }: TextInputProps) => {
-  // const [inputValue, setInputValue] = useState(defaultValue || "");
-
   const componentClassName = cx("text-input", className, {
     "text-input--disabled": disabled,
   });
-
-  // const handleOnChange = (event: ChangeEvent<HTMLInputElement>) => {
-  //   setInputValue(event.target.value);
-
-  //   if (onChange) {
-  //     onChange(event);
-  //   }
-  // };
 
   return (
     <input

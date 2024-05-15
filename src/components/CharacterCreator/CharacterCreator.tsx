@@ -259,18 +259,33 @@ export const CharacterCreator = ({ className }: CharacterCreatorProps) => {
 
   const handleClassChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedValue = event.target.value;
+
+    /**
+     * Retrieves the label of the selected character class.
+     * If the selected value matches a character class option, the corresponding label is returned.
+     * If no match is found, an empty string is returned.
+     */
     const selectedLabel =
       characterClasses.find((option) => option.value === selectedValue)
         ?.label || "";
+
     setClassValue(selectedLabel); // Assuming you want to display the label
   };
 
+  /**
+   * Handles the change event for the attributes checkboxes.
+   * Updates the `checkedAttributes` state based on the checkbox selection.
+   */
   const handleAttributesChange = (event: ChangeEvent<HTMLInputElement>) => {
     const attribute = event.target.value;
     const isChecked = event.target.checked;
+
+    // If the checkbox is checked, add the attribute to the list of checked attributes.
     if (isChecked) {
+      // Ensure that no more than 2 attributes are selected
       setCheckedAttributes((prevAttributes) => [...prevAttributes, attribute]);
     } else {
+      /// If the checkbox is unchecked, remove the attribute from the list of checked attributes.
       setCheckedAttributes((prevAttributes) =>
         prevAttributes.filter((attr) => attr !== attribute),
       );
@@ -309,7 +324,9 @@ export const CharacterCreator = ({ className }: CharacterCreatorProps) => {
     }
 
     setCharacterStat((prevStats) => ({
+      /// Spread the previous stats
       ...prevStats,
+      // Update the specific stat with the new value and modifier
       [statId]: {
         value: statValue,
         modifier: statModifier,
@@ -317,51 +334,74 @@ export const CharacterCreator = ({ className }: CharacterCreatorProps) => {
     }));
   };
 
+  // const handleFormSubmit = (event: React.FormEvent<HTMLButtonElement>) => {
+  //   event.preventDefault();
+
+  //   const characterData = {
+  //     name: characterName,
+  //     level: characterLevel,
+  //     class: classValue,
+  //     attributes: checkedAttributes,
+  //     stats: characterStats,
+  //   };
+
+  //   console.log(characterData);
+  // };
+
   const componentClassName = cx("character-creator", className);
 
   return (
-    <div className={componentClassName}>
-      <TextField
-        label="Character Name"
-        id="character-name"
-        placeholder="Enter character name"
-        onChange={handleNameChange}
-      />
-      <SelectField
-        label="Character Class"
-        id="character-class"
-        options={characterClasses}
-        value={classValue}
-        onChange={handleClassChange}
-      />
-      <TextField
-        label="Character Level"
-        id="character-level"
-        type="number"
-        minNumber={1}
-        maxNumber={20}
-        value={characterLevel}
-        onChange={handleLevelChange}
-      />
+    <>
+      <form className={componentClassName}>
+        <TextField
+          label="Character Name"
+          id="character-name"
+          placeholder="Enter character name"
+          onChange={handleNameChange}
+        />
+        <SelectField
+          label="Character Class"
+          id="character-class"
+          options={characterClasses}
+          value={classValue}
+          onChange={handleClassChange}
+        />
+        <TextField
+          label="Character Level"
+          id="character-level"
+          type="number"
+          minNumber={1}
+          maxNumber={20}
+          value={characterLevel}
+          onChange={handleLevelChange}
+        />
 
-      <div className="stats">
-        {stats.map((stat) => (
-          <StatInput
-            key={stat.id}
-            label={stat.label}
-            id={stat.id}
-            defaultValue={10}
-            onChange={handleStatChange}
-          />
-        ))}
-      </div>
-      <CheckboxField
-        legend="Character Attributes"
-        checkboxItems={skills}
-        onChange={handleAttributesChange}
-        required
-        maxChecked={2}
-      />
+        <div className="stats">
+          {stats.map((stat) => (
+            <StatInput
+              key={stat.id}
+              label={stat.label}
+              id={stat.id}
+              defaultValue={10}
+              onChange={handleStatChange}
+            />
+          ))}
+        </div>
+        <CheckboxField
+          legend="Character Attributes"
+          checkboxItems={skills}
+          onChange={handleAttributesChange}
+          required
+          maxChecked={2}
+        />
+
+        {/* <button
+          type="submit"
+          onSubmit={handleFormSubmit}
+          className="character-creator__submit">
+          Create Character
+        </button> */}
+      </form>
 
       <div className="character-creator__display">
         <p>
@@ -410,7 +450,7 @@ export const CharacterCreator = ({ className }: CharacterCreatorProps) => {
           />
         ))}
       </div>
-    </div>
+    </>
   );
 };
 

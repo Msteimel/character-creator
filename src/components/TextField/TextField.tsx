@@ -47,19 +47,17 @@ export const TextField = ({
 
     // Check if the input is a number and within the min/max range
     if (type === "number") {
-      if (type === "number") {
-        let value = parseInt(event.target.value);
-        if (isNaN(value)) {
-          value = 0;
-        }
-        if (minNumber !== undefined && value < minNumber) {
-          value = minNumber;
-        }
-        if (maxNumber !== undefined && value > maxNumber) {
-          value = maxNumber;
-        }
-        setInputValue(value.toString());
+      let value = parseInt(event.target.value);
+      if (isNaN(value)) {
+        value = 0;
       }
+      if (minNumber !== undefined && value < minNumber) {
+        value = minNumber;
+      }
+      if (maxNumber !== undefined && value > maxNumber) {
+        value = maxNumber;
+      }
+      setInputValue(value.toString());
     }
 
     if (onChange) {
