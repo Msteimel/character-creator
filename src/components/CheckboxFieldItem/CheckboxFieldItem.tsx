@@ -1,4 +1,4 @@
-import React, { ChangeEventHandler, useEffect, useState } from "react";
+import React, { ChangeEventHandler, useState } from "react";
 import cx from "classnames";
 import { Label, LabelProps } from "components/Label/Label";
 import {
@@ -28,10 +28,6 @@ export const CheckboxFieldItem = ({
   onChange,
 }: CheckboxFieldItemProps) => {
   const [isChecked, setIsChecked] = useState<boolean>(checked);
-
-  useEffect(() => {
-    setIsChecked(checked);
-  }, [checked]);
 
   const handleChange: ChangeEventHandler<HTMLInputElement> = (event) => {
     setIsChecked(event.target.checked);

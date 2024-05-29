@@ -1,4 +1,4 @@
-import React, { useState, useEffect, ChangeEvent } from "react";
+import React, { useEffect, ChangeEvent, useReducer } from "react";
 import cx from "classnames";
 import "./characterCreator.css";
 
@@ -8,6 +8,13 @@ import { CheckboxField } from "components/CheckboxField/CheckboxField";
 import { StatInput } from "components/StatInput/StatInput";
 
 export interface CharacterClassesProps {
+  value: string;
+  label: string;
+}
+
+export interface CharacterRaceProps {
+  name: string;
+  url: string;
   value: string;
   label: string;
 }
@@ -166,7 +173,7 @@ interface AttributeModifiersProps {
   skill: string;
   modifier: number;
   proficient: boolean;
-  proficientBonus: number;
+  proficientBonus: number | undefined;
   raceBonus?: number;
 }
 
@@ -192,22 +199,83 @@ const AttributeModifiers = ({
   );
 };
 
+interface CharacterState {
+  characterOptions: CharacterClassesProps[];
+  raceOptions: CharacterRaceProps[];
+  name?: string;
+  class?: string;
+  race?: string;
+  level?: number;
+  proficiencyBonus?: number;
+  checkedAttributes?: string[] | undefined;
+  stats?: CharacterStatsProps | undefined;
+}
+
+type CharacterAction =
+  | { type: "SET_CHARACTER_OPTIONS"; payload: CharacterClassesProps[] }
+  | { type: "SET_RACE_OPTIONS"; payload: CharacterRaceProps[] }
+  | { type: "SET_CHARACTER_NAME"; payload: string }
+  | { type: "SET_CHARACTER_CLASS"; payload: string }
+  | { type: "SET_CHARACTER_RACE"; payload: string }
+  | { type: "SET_CHARACTER_LEVEL"; payload: number }
+  | { type: "SET_PROFICIENCY_BONUS"; payload: number }
+  | { type: "SET_CHECKED_ATTRIBUTES"; payload: string[] }
+  | { type: "SET_CHARACTER_STATS"; payload: CharacterStatsProps };
+
+function CharacterReducer(state: CharacterState, action: CharacterAction) {
+  switch (action.type) {
+    case "SET_CHARACTER_OPTIONS":
+      return { ...state, characterOptions: action.payload };
+    case "SET_RACE_OPTIONS":
+      return { ...state, raceOptions: action.payload };
+    case "SET_CHARACTER_NAME":
+      return { ...state, name: action.payload };
+    case "SET_CHARACTER_LEVEL":
+      return { ...state, level: action.payload };
+    case "SET_CHARACTER_CLASS":
+      return { ...state, class: action.payload };
+    case "SET_PROFICIENCY_BONUS": {
+      let bonus = 2;
+      if (action.payload <= 1) {
+        bonus = 2;
+      } else if (action.payload <= 5) {
+        bonus = 3;
+      } else if (action.payload <= 9) {
+        bonus = 4;
+      } else if (action.payload <= 13) {
+        bonus = 5;
+      } else if (action.payload <= 17) {
+        bonus = 6;
+      }
+      return { ...state, proficiencyBonus: bonus };
+    }
+    case "SET_CHARACTER_RACE":
+      return { ...state, race: action.payload };
+    case "SET_CHECKED_ATTRIBUTES":
+      return { ...state, checkedAttributes: action.payload };
+    case "SET_CHARACTER_STATS":
+      return { ...state, stats: action.payload };
+  }
+}
+
 export const CharacterCreator = ({ className }: CharacterCreatorProps) => {
-  const [characterClasses, setCharacterClasses] = useState<
-    CharacterClassesProps[]
-  >([]);
-  const [characterName, setCharacterName] = useState<string>("");
-  const [characterLevel, setCharacterLevel] = useState<number>(1);
-  const [proficiencyBonus, setProficiencyBonus] = useState<number>(2);
-  const [classValue, setClassValue] = useState<string | undefined>("");
-  const [checkedAttributes, setCheckedAttributes] = useState<string[]>([]);
-  const [characterStats, setCharacterStat] = useState<CharacterStatsProps>({
-    strength: { value: 10, modifier: 0 },
-    dexterity: { value: 10, modifier: 0 },
-    constitution: { value: 10, modifier: 0 },
-    intelligence: { value: 10, modifier: 0 },
-    wisdom: { value: 10, modifier: 0 },
-    charisma: { value: 10, modifier: 0 },
+  const [state, dispatch] = useReducer(CharacterReducer, {
+    characterOptions: [],
+    raceOptions: [],
+    name: "",
+    race: "",
+    class: "",
+    level: 1,
+    proficiencyBonus: 2,
+    checkedAttributes: [],
+    stats: {
+      strength: { value: 10, modifier: 0 },
+      dexterity: { value: 10, modifier: 0 },
+      constitution: { value: 10, modifier: 0 },
+      intelligence: { value: 10, modifier: 0 },
+      wisdom: { value: 10, modifier: 0 },
+      charisma: { value: 10, modifier: 0 },
+    },
   });
 
   useEffect(() => {
@@ -219,13 +287,17 @@ export const CharacterCreator = ({ className }: CharacterCreatorProps) => {
           redirect: "follow",
         });
         const data = await response.json();
-        const mappedData = data.results.map((item: any) => ({
+        const mappedData = data.results.map((item: any, index: number) => ({
+          index: index,
           value: item.index,
           label: item.name,
         }));
-        setCharacterClasses(mappedData);
+        dispatch({ type: "SET_CHARACTER_OPTIONS", payload: mappedData });
         if (mappedData.length > 0) {
-          setClassValue(mappedData[0].label); // Set default class if you want
+          dispatch({
+            type: "SET_CHARACTER_CLASS",
+            payload: mappedData[0].label,
+          });
         }
       } catch (error) {
         console.error("Failed to fetch classes:", error);
@@ -235,26 +307,45 @@ export const CharacterCreator = ({ className }: CharacterCreatorProps) => {
     fetchClasses();
   }, []);
 
+  useEffect(() => {
+    const fetchRaces = async () => {
+      try {
+        const response = await fetch("https://www.dnd5eapi.co/api/races/", {
+          method: "GET",
+          headers: { Accept: "application/json" },
+          redirect: "follow",
+        });
+        const data = await response.json();
+        const mappedData = data.results.map((item: any, index: number) => ({
+          index: index,
+          url: item.url,
+          name: item.name,
+          value: item.index,
+          label: item.name,
+        }));
+        dispatch({ type: "SET_RACE_OPTIONS", payload: mappedData });
+        if (mappedData.length > 0) {
+          dispatch({
+            type: "SET_CHARACTER_RACE",
+            payload: mappedData[0].label,
+          });
+        }
+      } catch (error) {
+        console.error("Failed to fetch races:", error);
+      }
+    };
+
+    fetchRaces();
+  }, []);
+
   const handleNameChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setCharacterName(event.target.value);
+    dispatch({ type: "SET_CHARACTER_NAME", payload: event.target.value });
   };
 
   const handleLevelChange = (event: ChangeEvent<HTMLInputElement>) => {
     const level = parseInt(event.target.value);
-
-    if (level <= 1) {
-      setProficiencyBonus(2);
-    } else if (level <= 5) {
-      setProficiencyBonus(3);
-    } else if (level <= 9) {
-      setProficiencyBonus(4);
-    } else if (level <= 13) {
-      setProficiencyBonus(5);
-    } else if (level <= 17) {
-      setProficiencyBonus(6);
-    }
-
-    setCharacterLevel(level);
+    dispatch({ type: "SET_CHARACTER_LEVEL", payload: level });
+    dispatch({ type: "SET_PROFICIENCY_BONUS", payload: level });
   };
 
   const handleClassChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -266,10 +357,25 @@ export const CharacterCreator = ({ className }: CharacterCreatorProps) => {
      * If no match is found, an empty string is returned.
      */
     const selectedLabel =
-      characterClasses.find((option) => option.value === selectedValue)
+      state.characterOptions.find((option) => option.value === selectedValue)
         ?.label || "";
 
-    setClassValue(selectedLabel); // Assuming you want to display the label
+    dispatch({ type: "SET_CHARACTER_CLASS", payload: selectedLabel });
+  };
+
+  const handleRaceChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedValue = event.target.value;
+
+    /**
+     * Retrieves the label of the selected character Race.
+     * If the selected value matches a character Race option, the corresponding label is returned.
+     * If no match is found, an empty string is returned.
+     */
+    const selectedLabel =
+      state.raceOptions.find((option) => option.value === selectedValue)
+        ?.label || "";
+
+    dispatch({ type: "SET_CHARACTER_RACE", payload: selectedLabel });
   };
 
   /**
@@ -280,18 +386,21 @@ export const CharacterCreator = ({ className }: CharacterCreatorProps) => {
     const attribute = event.target.value;
     const isChecked = event.target.checked;
 
-    // If the checkbox is checked, add the attribute to the list of checked attributes.
+    let updatedAttributes = [...(state.checkedAttributes ?? [])];
+
     if (isChecked) {
-      // Ensure that no more than 2 attributes are selected
-      setCheckedAttributes((prevAttributes) => [...prevAttributes, attribute]);
+      // Add the attribute to the array if it doesn't exceed the limit
+      if (updatedAttributes.length < 5) {
+        updatedAttributes.push(attribute);
+      }
     } else {
-      /// If the checkbox is unchecked, remove the attribute from the list of checked attributes.
-      setCheckedAttributes((prevAttributes) =>
-        prevAttributes.filter((attr) => attr !== attribute),
+      // Remove the attribute from the array
+      updatedAttributes = updatedAttributes.filter(
+        (attr) => attr !== attribute,
       );
     }
 
-    console.log(checkedAttributes);
+    dispatch({ type: "SET_CHECKED_ATTRIBUTES", payload: updatedAttributes });
   };
 
   const handleStatChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -323,36 +432,37 @@ export const CharacterCreator = ({ className }: CharacterCreatorProps) => {
       statModifier = -5;
     }
 
-    setCharacterStat((prevStats) => ({
-      /// Spread the previous stats
-      ...prevStats,
-      // Update the specific stat with the new value and modifier
-      [statId]: {
-        value: statValue,
-        modifier: statModifier,
-      },
-    }));
+    let updatedStats = { ...(state.stats ?? {}) };
+
+    updatedStats[statId] = {
+      value: statValue,
+      modifier: statModifier,
+    };
+
+    dispatch({ type: "SET_CHARACTER_STATS", payload: updatedStats });
   };
 
-  // const handleFormSubmit = (event: React.FormEvent<HTMLButtonElement>) => {
-  //   event.preventDefault();
+  const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
 
-  //   const characterData = {
-  //     name: characterName,
-  //     level: characterLevel,
-  //     class: classValue,
-  //     attributes: checkedAttributes,
-  //     stats: characterStats,
-  //   };
+    const characterData = {
+      name: state.name,
+      race: state.race,
+      level: state.level,
+      class: state.class,
+      attributes: state.checkedAttributes,
+      stats: state.stats,
+      proficiencyBonus: state.proficiencyBonus,
+    };
 
-  //   console.log(characterData);
-  // };
+    console.log(characterData);
+  };
 
   const componentClassName = cx("character-creator", className);
 
   return (
-    <>
-      <form className={componentClassName}>
+    <div className={componentClassName}>
+      <form onSubmit={handleFormSubmit}>
         <TextField
           label="Character Name"
           id="character-name"
@@ -362,9 +472,16 @@ export const CharacterCreator = ({ className }: CharacterCreatorProps) => {
         <SelectField
           label="Character Class"
           id="character-class"
-          options={characterClasses}
-          value={classValue}
+          options={state.characterOptions}
+          value={state.class}
           onChange={handleClassChange}
+        />
+        <SelectField
+          label="Character Race"
+          id="character-Race"
+          options={state.raceOptions}
+          value={state.race}
+          onChange={handleRaceChange}
         />
         <TextField
           label="Character Level"
@@ -372,7 +489,8 @@ export const CharacterCreator = ({ className }: CharacterCreatorProps) => {
           type="number"
           minNumber={1}
           maxNumber={20}
-          value={characterLevel}
+          defaultValue={1}
+          value={state.level}
           onChange={handleLevelChange}
         />
 
@@ -392,41 +510,42 @@ export const CharacterCreator = ({ className }: CharacterCreatorProps) => {
           checkboxItems={skills}
           onChange={handleAttributesChange}
           required
-          maxChecked={2}
+          maxChecked={5}
         />
 
-        {/* <button
-          type="submit"
-          onSubmit={handleFormSubmit}
-          className="character-creator__submit">
+        <button type="submit" className="character-creator__submit">
           Create Character
-        </button> */}
+        </button>
       </form>
 
       <div className="character-creator__display">
         <p>
           <strong>Name: </strong>
-          {characterName} <span id="character-name-display"></span>
+          {state.name}
         </p>
         <p>
-          <strong>Level:</strong> {characterLevel}
+          <strong>Race: </strong>
+          {state.race}
         </p>
         <p>
-          <strong>Proficiency Bonus:</strong> +{proficiencyBonus}
+          <strong>Level:</strong> {state.level}
+        </p>
+        <p>
+          <strong>Proficiency Bonus:</strong> +{state.proficiencyBonus}
         </p>
         <p>
           <strong>Class:</strong>{" "}
-          <span id="character-class-display">{classValue}</span>
+          <span id="character-class-display">{state.class}</span>
         </p>
         <p>
           <span id="character-attributes-display">
-            {checkedAttributes.join(", ")}
+            {state.checkedAttributes?.join(", ")}
           </span>
         </p>
         <div>
           <strong>Stats:</strong>
           <ul>
-            {Object.entries(characterStats).map(([stat, value]) => (
+            {Object.entries(state.stats ?? {}).map(([stat, value]) => (
               <li key={stat}>
                 <strong>{stat}:</strong> {value.value.toString()}, Mod{" "}
                 {value.modifier.toString() > "0"
@@ -444,13 +563,15 @@ export const CharacterCreator = ({ className }: CharacterCreatorProps) => {
             key={skill.id}
             skill={skill.label}
             attribute={skill.attribute}
-            modifier={characterStats[skill.attribute].modifier}
-            proficient={checkedAttributes.includes(skill.value)}
-            proficientBonus={proficiencyBonus}
+            modifier={state.stats?.[skill.attribute]?.modifier ?? 0}
+            proficient={
+              state.checkedAttributes?.includes(skill.value) ? true : false
+            }
+            proficientBonus={state.proficiencyBonus}
           />
         ))}
       </div>
-    </>
+    </div>
   );
 };
 
