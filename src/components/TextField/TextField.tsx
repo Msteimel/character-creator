@@ -1,8 +1,8 @@
 import React, { ChangeEvent, useEffect, useState } from "react";
 import cx from "classnames";
 import "./textField.css";
-import { Label, LabelProps } from "components/Label/Label";
-import { TextInput, TextInputProps } from "components/TextInput/TextInput";
+import { Label, LabelProps } from "@components/Label/Label";
+import { TextInput, TextInputProps } from "@components/TextInput/TextInput";
 
 export interface TextFieldProps extends TextInputProps, LabelProps {
   /**

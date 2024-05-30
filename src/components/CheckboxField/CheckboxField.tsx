@@ -3,7 +3,7 @@ import cx from "classnames";
 import {
   CheckboxFieldItem,
   CheckboxFieldItemProps,
-} from "components/CheckboxFieldItem/CheckboxFieldItem";
+} from "@components/CheckboxFieldItem/CheckboxFieldItem";
 
 import "./checkboxField.css";
 

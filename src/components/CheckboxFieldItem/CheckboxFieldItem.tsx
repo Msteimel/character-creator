@@ -1,10 +1,10 @@
 import React, { ChangeEventHandler, useState } from "react";
 import cx from "classnames";
-import { Label, LabelProps } from "components/Label/Label";
+import { Label, LabelProps } from "@components/Label/Label";
 import {
   CheckboxInput,
   CheckboxInputProps,
-} from "components/CheckboxInput/CheckboxInput";
+} from "@components/CheckboxInput/CheckboxInput";
 
 import "./checkboxFieldItem.css";
 

@@ -1,11 +1,13 @@
+"use client";
+
 import React, { useEffect, ChangeEvent, useReducer } from "react";
 import cx from "classnames";
 import "./characterCreator.css";
 
-import { TextField } from "components/TextField/TextField";
-import { SelectField } from "components/SelectField/SelectField";
-import { CheckboxField } from "components/CheckboxField/CheckboxField";
-import { StatInput } from "components/StatInput/StatInput";
+import { TextField } from "@components/TextField/TextField";
+import { SelectField } from "@components/SelectField/SelectField";
+import { CheckboxField } from "@components/CheckboxField/CheckboxField";
+import { StatInput } from "@components/StatInput/StatInput";
 
 export interface CharacterClassesProps {
   value: string;

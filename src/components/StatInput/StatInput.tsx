@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import cx from "classnames";
-import { TextField, TextFieldProps } from "components/TextField/TextField";
+import { TextField, TextFieldProps } from "@components/TextField/TextField";
 import "./statInput.css";
 
 export interface StatInputProps extends TextFieldProps {}

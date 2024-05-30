@@ -1,8 +1,8 @@
 import React, { useState, ChangeEvent } from "react";
 import cx from "classnames";
 import "./selectField.css";
-import { Label, LabelProps } from "components/Label/Label";
-import { Select, SelectProps } from "components/Select/Select";
+import { Label, LabelProps } from "@components/Label/Label";
+import { Select, SelectProps } from "@components/Select/Select";
 
 export interface SelectFieldProps extends SelectProps, LabelProps {
   label?: string;
