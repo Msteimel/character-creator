@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useEffect, ChangeEvent, useReducer, use } from "react";
+import React, { useEffect, ChangeEvent, useReducer, useState } from "react";
 import cx from "classnames";
 import "./characterCreator.css";
 import { fetchData } from "@utils/fetchData";
+import { ClassDataProps } from "@/pages/api/classes/classData";
 
 import { useClasses } from "@context/ClassesContext";
 import { useRaces } from "@/context/RacesContext";
@@ -219,7 +220,8 @@ type CharacterAction =
   | { type: "SET_CHARACTER_LEVEL"; payload: number }
   | { type: "SET_PROFICIENCY_BONUS"; payload: number }
   | { type: "SET_CHECKED_ATTRIBUTES"; payload: string[] }
-  | { type: "SET_CHARACTER_STATS"; payload: CharacterStatsProps };
+  | { type: "SET_CHARACTER_STATS"; payload: CharacterStatsProps }
+  | { type: "SET_CLASS_DATA"; payload: ClassDataProps };
 
 function CharacterReducer(state: CharacterState, action: CharacterAction) {
   switch (action.type) {
@@ -254,6 +256,8 @@ function CharacterReducer(state: CharacterState, action: CharacterAction) {
       return { ...state, checkedAttributes: action.payload };
     case "SET_CHARACTER_STATS":
       return { ...state, stats: action.payload };
+    case "SET_CLASS_DATA":
+      return { ...state, classData: action.payload };
   }
 }
 
@@ -263,14 +267,15 @@ export const CharacterCreator = ({ className }: CharacterCreatorProps) => {
   const abilityScores = useAbilityScores();
   const characterSkills = useSkills();
 
-  // console.log(characterSkills.skills);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
   const [state, dispatch] = useReducer(CharacterReducer, {
     characterOptions: [],
     raceOptions: [],
     name: "",
-    race: "",
-    class: "",
+    race: "Dragonborn",
+    class: "Barbarian",
     level: 1,
     proficiencyBonus: 2,
     checkedAttributes: [],
@@ -282,6 +287,7 @@ export const CharacterCreator = ({ className }: CharacterCreatorProps) => {
       wisdom: { value: 10, modifier: 0 },
       charisma: { value: 10, modifier: 0 },
     },
+    classData: null,
   });
 
   useEffect(() => {
@@ -346,20 +352,9 @@ export const CharacterCreator = ({ className }: CharacterCreatorProps) => {
     dispatch({ type: "SET_PROFICIENCY_BONUS", payload: level });
   };
 
-  const fetchClassProficiencyOptions = async (selectedClass: string) => {
-    const characterClass = selectedClass.toLowerCase();
-    console.log("Class:", characterClass);
-
-    try {
-      const classData = await fetchData(`/api/classes/${characterClass}`);
-
-      console.log("Class data:", classData);
-    } catch (error) {
-      console.error("Failed to fetch class data:", error);
-    }
-  };
-
-  const handleClassChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleClassChange = async (
+    event: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
     const selectedValue = event.target.value;
 
     /**
@@ -373,29 +368,27 @@ export const CharacterCreator = ({ className }: CharacterCreatorProps) => {
 
     dispatch({ type: "SET_CHARACTER_CLASS", payload: selectedLabel });
 
-    console.log(state.class);
+    setLoading(true);
+    setError(null);
+
+    try {
+      const res = await fetch(`/api/classes/${selectedLabel.toLowerCase()}`);
+      if (!res.ok) {
+        throw new Error("Failed to fetch class data");
+      }
+      const data: ClassDataProps = await res.json();
+
+      dispatch({ type: "SET_CLASS_DATA", payload: data });
+    } catch (error) {
+      setError((error as Error).message);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // useEffect(() => {
-  //   const fetchDataAsync = async () => {
-  //     console.log("useEffect triggered with state.class:", state.class);
-
-  //     try {
-  //       const selectedClass = state.class?.toLowerCase() || "barbarian";
-  //       console.log(
-  //         `Calling fetchData with URL: /api/classes/${selectedClass}`,
-  //       );
-  //       const data = await fetchData(`/api/classes/${selectedClass}`);
-  //       console.log("Fetched class data in useEffect:", data);
-  //     } catch (error) {
-  //       console.error("Error in useEffect:", error);
-  //     }
-  //   };
-
-  //   fetchDataAsync();
-  // }, [state.class]);
-
-  const handleRaceChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleRaceChange = async (
+    event: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
     const selectedValue = event.target.value;
 
     /**
