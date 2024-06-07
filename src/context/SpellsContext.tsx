@@ -6,6 +6,7 @@ import React, {
   useEffect,
   ReactNode,
 } from "react";
+import { fetchData } from "@utils/fetchData"; // Import the fetchData function
 
 interface Spell {
   index: string;
@@ -36,12 +37,15 @@ export const SpellsProvider = ({ children }: SpellsProviderProps) => {
   const [spells, setSpells] = useState<Spell[]>([]);
 
   useEffect(() => {
-    const fetchSpells = async () => {
-      const res = await fetch("https://www.dnd5eapi.co/api/spells");
-      const data = await res.json();
-      setSpells(data.results);
+    const fetchDataFromApi = async () => {
+      try {
+        const data = await fetchData("/api/spells");
+        setSpells(data);
+      } catch (error) {
+        console.error("Failed to fetch spells:", error);
+      }
     };
-    fetchSpells();
+    fetchDataFromApi();
   }, []);
 
   return (

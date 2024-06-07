@@ -1,8 +1,14 @@
 "use client";
 
-import React, { useEffect, ChangeEvent, useReducer } from "react";
+import React, { useEffect, ChangeEvent, useReducer, use } from "react";
 import cx from "classnames";
 import "./characterCreator.css";
+import { fetchData } from "@utils/fetchData";
+
+import { useClasses } from "@context/ClassesContext";
+import { useRaces } from "@/context/RacesContext";
+import { useAbilityScores } from "@/context/AbilityScoreContext";
+import { useSkills } from "@/context/SkillsContext";
 
 import { TextField } from "@components/TextField/TextField";
 import { SelectField } from "@components/SelectField/SelectField";
@@ -31,15 +37,6 @@ export interface CharacterStatsProps {
     modifier: number;
   };
 }
-
-const stats = [
-  { id: "strength", label: "Strength" },
-  { id: "intelligence", label: "Intelligence" },
-  { id: "dexterity", label: "Dexterity" },
-  { id: "wisdom", label: "Wisdom" },
-  { id: "charisma", label: "Charisma" },
-  { id: "constitution", label: "Constitution" },
-];
 
 const skills = [
   {
@@ -261,6 +258,13 @@ function CharacterReducer(state: CharacterState, action: CharacterAction) {
 }
 
 export const CharacterCreator = ({ className }: CharacterCreatorProps) => {
+  const characterClasses = useClasses();
+  const characterRaces = useRaces();
+  const abilityScores = useAbilityScores();
+  const characterSkills = useSkills();
+
+  // console.log(characterSkills.skills);
+
   const [state, dispatch] = useReducer(CharacterReducer, {
     characterOptions: [],
     raceOptions: [],
@@ -283,17 +287,13 @@ export const CharacterCreator = ({ className }: CharacterCreatorProps) => {
   useEffect(() => {
     const fetchClasses = async () => {
       try {
-        const response = await fetch("https://www.dnd5eapi.co/api/classes/", {
-          method: "GET",
-          headers: { Accept: "application/json" },
-          redirect: "follow",
-        });
-        const data = await response.json();
-        const mappedData = data.results.map((item: any, index: number) => ({
-          index: index,
-          value: item.index,
-          label: item.name,
-        }));
+        const mappedData = characterClasses.classes.map(
+          (item: any, index: number) => ({
+            index,
+            value: item.index,
+            label: item.name,
+          }),
+        );
         dispatch({ type: "SET_CHARACTER_OPTIONS", payload: mappedData });
         if (mappedData.length > 0) {
           dispatch({
@@ -307,24 +307,20 @@ export const CharacterCreator = ({ className }: CharacterCreatorProps) => {
     };
 
     fetchClasses();
-  }, []);
+  }, [characterClasses.classes]);
 
   useEffect(() => {
     const fetchRaces = async () => {
       try {
-        const response = await fetch("https://www.dnd5eapi.co/api/races/", {
-          method: "GET",
-          headers: { Accept: "application/json" },
-          redirect: "follow",
-        });
-        const data = await response.json();
-        const mappedData = data.results.map((item: any, index: number) => ({
-          index: index,
-          url: item.url,
-          name: item.name,
-          value: item.index,
-          label: item.name,
-        }));
+        const mappedData = characterRaces.races.map(
+          (item: any, index: number) => ({
+            index,
+            url: item.url,
+            name: item.name,
+            value: item.index,
+            label: item.name,
+          }),
+        );
         dispatch({ type: "SET_RACE_OPTIONS", payload: mappedData });
         if (mappedData.length > 0) {
           dispatch({
@@ -338,7 +334,7 @@ export const CharacterCreator = ({ className }: CharacterCreatorProps) => {
     };
 
     fetchRaces();
-  }, []);
+  }, [characterRaces.races]);
 
   const handleNameChange = (event: ChangeEvent<HTMLInputElement>) => {
     dispatch({ type: "SET_CHARACTER_NAME", payload: event.target.value });
@@ -348,6 +344,19 @@ export const CharacterCreator = ({ className }: CharacterCreatorProps) => {
     const level = parseInt(event.target.value);
     dispatch({ type: "SET_CHARACTER_LEVEL", payload: level });
     dispatch({ type: "SET_PROFICIENCY_BONUS", payload: level });
+  };
+
+  const fetchClassProficiencyOptions = async (selectedClass: string) => {
+    const characterClass = selectedClass.toLowerCase();
+    console.log("Class:", characterClass);
+
+    try {
+      const classData = await fetchData(`/api/classes/${characterClass}`);
+
+      console.log("Class data:", classData);
+    } catch (error) {
+      console.error("Failed to fetch class data:", error);
+    }
   };
 
   const handleClassChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -363,7 +372,28 @@ export const CharacterCreator = ({ className }: CharacterCreatorProps) => {
         ?.label || "";
 
     dispatch({ type: "SET_CHARACTER_CLASS", payload: selectedLabel });
+
+    console.log(state.class);
   };
+
+  // useEffect(() => {
+  //   const fetchDataAsync = async () => {
+  //     console.log("useEffect triggered with state.class:", state.class);
+
+  //     try {
+  //       const selectedClass = state.class?.toLowerCase() || "barbarian";
+  //       console.log(
+  //         `Calling fetchData with URL: /api/classes/${selectedClass}`,
+  //       );
+  //       const data = await fetchData(`/api/classes/${selectedClass}`);
+  //       console.log("Fetched class data in useEffect:", data);
+  //     } catch (error) {
+  //       console.error("Error in useEffect:", error);
+  //     }
+  //   };
+
+  //   fetchDataAsync();
+  // }, [state.class]);
 
   const handleRaceChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedValue = event.target.value;
@@ -497,11 +527,11 @@ export const CharacterCreator = ({ className }: CharacterCreatorProps) => {
         />
 
         <div className="stats">
-          {stats.map((stat) => (
+          {abilityScores.abilityScores.map((stat) => (
             <StatInput
-              key={stat.id}
-              label={stat.label}
-              id={stat.id}
+              key={stat.index}
+              label={stat.name}
+              id={stat.index}
               defaultValue={10}
               onChange={handleStatChange}
             />
