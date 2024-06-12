@@ -54,6 +54,7 @@ export const CheckboxInput = ({
       type="checkbox"
       id={id}
       checked={checked}
+      disabled={disabled}
       name={name}
       value={value}
       onChange={onChange}

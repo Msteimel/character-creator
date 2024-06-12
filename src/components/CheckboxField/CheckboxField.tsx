@@ -7,13 +7,14 @@ import {
 
 import "./checkboxField.css";
 
-interface checkboxItem extends CheckboxFieldItemProps {}
-
 export interface CheckboxFieldProps {
   className?: string;
   legend?: string;
   id?: string;
-  checkboxItems: checkboxItem | checkboxItem[];
+  children?:
+    | React.ReactElement<CheckboxFieldItemProps>
+    | React.ReactElement<CheckboxFieldItemProps>[];
+  description?: string;
   error?: boolean;
   maxChecked?: number;
   required?: boolean;
@@ -24,7 +25,8 @@ export const CheckboxField = ({
   className,
   legend,
   id,
-  checkboxItems,
+  children,
+  description,
   onChange,
   maxChecked,
   error = false,
@@ -61,30 +63,19 @@ export const CheckboxField = ({
     }
   };
 
-  const componentClassName = cx("checkbox-input", className);
+  const componentClassName = cx("checkbox-field", className);
 
   return (
     <fieldset className={componentClassName} id={id} {...other}>
-      {legend && <legend className="checkbox-input__legend">{legend}</legend>}
+      {legend && <legend className="checkbox-field__legend">{legend}</legend>}
+      {description && <p className="checkbox-field__desc">{description}</p>}
       {isError && (
-        <span className="checkbox-input__error">Error: {errorMessages}</span>
+        <span className="checkbox-field__error">Error: {errorMessages}</span>
       )}
       <ul>
-        {Array.isArray(checkboxItems)
-          ? checkboxItems.map((checkboxItem, index) => (
-              <CheckboxFieldItem
-                key={index}
-                onChange={handleChange}
-                {...checkboxItem}
-              />
-            ))
-          : [
-              <CheckboxFieldItem
-                key={0}
-                onChange={handleChange}
-                {...checkboxItems}
-              />,
-            ]}
+        {React.Children.map(children, (child) =>
+          React.cloneElement(child, { onChange: handleChange }),
+        )}
       </ul>
     </fieldset>
   );

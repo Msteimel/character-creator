@@ -4,40 +4,16 @@ import React, { useEffect, ChangeEvent, useReducer, useState } from "react";
 import cx from "classnames";
 import "./characterCreator.css";
 import { fetchData } from "@utils/fetchData";
-import { ClassDataProps } from "@/pages/api/classes/classData";
 
 import { useClasses } from "@context/ClassesContext";
 import { useRaces } from "@/context/RacesContext";
 import { useAbilityScores } from "@/context/AbilityScoreContext";
 import { useSkills } from "@/context/SkillsContext";
 
+import { CharacterCheckboxField } from "@components/CharacterCreator/CharacterCheckboxField";
 import { TextField } from "@components/TextField/TextField";
 import { SelectField } from "@components/SelectField/SelectField";
-import { CheckboxField } from "@components/CheckboxField/CheckboxField";
 import { StatInput } from "@components/StatInput/StatInput";
-
-export interface CharacterClassesProps {
-  value: string;
-  label: string;
-}
-
-export interface CharacterRaceProps {
-  name: string;
-  url: string;
-  value: string;
-  label: string;
-}
-
-export interface CharacterCreatorProps {
-  className?: string;
-}
-
-export interface CharacterStatsProps {
-  [key: string]: {
-    value: number;
-    modifier: number;
-  };
-}
 
 const skills = [
   {
@@ -168,6 +144,60 @@ const skills = [
   },
 ];
 
+export interface CharacterClassesProps {
+  value: string;
+  label: string;
+}
+
+export interface CharacterRaceProps {
+  name: string;
+  url: string;
+  value: string;
+  label: string;
+}
+
+export interface CharacterCreatorProps {
+  className?: string;
+}
+
+export interface CharacterStatsProps {
+  [key: string]: {
+    value: number;
+    modifier: number;
+  };
+}
+
+interface ProficiencyChoiceProps {
+  choose: number;
+  desc: string;
+  from: {
+    options: [
+      item: {
+        index: string;
+        name: string;
+        url: string;
+      },
+    ];
+  };
+}
+
+export interface ClassDataProps {
+  index: string;
+  name: string;
+  hit_die: number;
+  proficiency_choices: ProficiencyChoiceProps[];
+  proficiencies: {
+    name: string;
+    index: string;
+    url: string;
+  }[];
+  saving_throws: {
+    name: string;
+    index: string;
+    url: string;
+  }[];
+}
+
 interface AttributeModifiersProps {
   attribute: string;
   skill: string;
@@ -209,6 +239,8 @@ interface CharacterState {
   proficiencyBonus?: number;
   checkedAttributes?: string[] | undefined;
   stats?: CharacterStatsProps | undefined;
+  classData?: ClassDataProps | null;
+  proficiencyChoices?: ProficiencyChoiceProps[] | null;
 }
 
 type CharacterAction =
@@ -221,7 +253,8 @@ type CharacterAction =
   | { type: "SET_PROFICIENCY_BONUS"; payload: number }
   | { type: "SET_CHECKED_ATTRIBUTES"; payload: string[] }
   | { type: "SET_CHARACTER_STATS"; payload: CharacterStatsProps }
-  | { type: "SET_CLASS_DATA"; payload: ClassDataProps };
+  | { type: "SET_CLASS_DATA"; payload: ClassDataProps }
+  | { type: "SET_PROFICIENCY_CHOICES"; payload: ProficiencyChoiceProps[] };
 
 function CharacterReducer(state: CharacterState, action: CharacterAction) {
   switch (action.type) {
@@ -258,6 +291,8 @@ function CharacterReducer(state: CharacterState, action: CharacterAction) {
       return { ...state, stats: action.payload };
     case "SET_CLASS_DATA":
       return { ...state, classData: action.payload };
+    case "SET_PROFICIENCY_CHOICES":
+      return { ...state, proficiencyChoices: action.payload };
   }
 }
 
@@ -288,6 +323,7 @@ export const CharacterCreator = ({ className }: CharacterCreatorProps) => {
       charisma: { value: 10, modifier: 0 },
     },
     classData: null,
+    proficiencyChoices: null,
   });
 
   useEffect(() => {
@@ -379,12 +415,40 @@ export const CharacterCreator = ({ className }: CharacterCreatorProps) => {
       const data: ClassDataProps = await res.json();
 
       dispatch({ type: "SET_CLASS_DATA", payload: data });
+      dispatch({
+        type: "SET_PROFICIENCY_CHOICES",
+        payload: data.proficiency_choices,
+      });
     } catch (error) {
       setError((error as Error).message);
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const fetchClassData = async () => {
+      try {
+        const res = await fetch(`/api/classes/barbarian`);
+        if (!res.ok) {
+          throw new Error("Failed to fetch class data");
+        }
+        const data: ClassDataProps = await res.json();
+
+        dispatch({ type: "SET_CLASS_DATA", payload: data });
+        dispatch({
+          type: "SET_PROFICIENCY_CHOICES",
+          payload: data.proficiency_choices,
+        });
+      } catch (error) {
+        setError((error as Error).message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchClassData();
+  }, []); // Empty dependency array
 
   const handleRaceChange = async (
     event: React.ChangeEvent<HTMLSelectElement>,
@@ -530,12 +594,10 @@ export const CharacterCreator = ({ className }: CharacterCreatorProps) => {
             />
           ))}
         </div>
-        <CheckboxField
-          legend="Character Attributes"
-          checkboxItems={skills}
-          onChange={handleAttributesChange}
-          required
-          maxChecked={5}
+        <CharacterCheckboxField
+          characterSkills={characterSkills}
+          proficiencyChoices={state.proficiencyChoices}
+          handleAttributesChange={handleAttributesChange}
         />
 
         <button type="submit" className="character-creator__submit">
