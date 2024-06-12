@@ -47,8 +47,6 @@ export const SkillsProvider = ({ children }: SkillsProviderProps) => {
         url: skill.url,
       }));
 
-      console.log("mappedData", mappedData);
-
       setSkills(mappedData);
     } catch (error) {
       console.error("Failed to fetch skills:", error);
@@ -58,23 +56,6 @@ export const SkillsProvider = ({ children }: SkillsProviderProps) => {
   useEffect(() => {
     fetchSkills();
   }, []);
-
-  // useEffect(() => {
-  //   const fetchDataFromApi = async () => {
-  //     skills.map(async (skill) => {
-  //       try {
-  //         // const data = await fetchData(skill.url);
-  //         console.log("skill", `https://www.dnd5eapi.co${skill.url}`);
-
-  //         // console.log(data);
-  //       } catch (error) {
-  //         console.error("Failed to fetch skill:", error);
-  //       }
-  //     });
-  //   };
-
-  //   fetchDataFromApi();
-  // }, [skills]);
 
   return (
     <SkillsContext.Provider value={{ skills }}>
