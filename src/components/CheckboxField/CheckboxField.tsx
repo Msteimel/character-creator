@@ -74,6 +74,7 @@ export const CheckboxField = ({
       )}
       <ul>
         {React.Children.map(children, (child) =>
+          // @ts-ignore
           React.cloneElement(child, { onChange: handleChange }),
         )}
       </ul>
